@@ -1,6 +1,8 @@
+import sys
+import json
 import os
 import time
-# import pyautogui
+import pyautogui
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -25,19 +27,19 @@ def setup_browser():
     driver = webdriver.Edge(service=Service(EdgeChromiumDriverManager().install()), options=browser_options)
     return driver
 
-def login(driver):
+def login(driver, vms_data):
     """Automates the login process."""
-    driver.get("http://192.168.86.10/")
+    driver.get(vms_data['url'])
 
     time.sleep(90)
 
     # Locate the username field and enter the username
     username_field = driver.find_element(By.ID, "loginUsername-inputEl")
-    username_field.send_keys("admin")
+    username_field.send_keys(vms_data['username'])
 
     # Locate the password field and enter the password
     password_field = driver.find_element(By.ID, "loginPassword-inputEl")
-    password_field.send_keys("@2022meru")
+    password_field.send_keys(vms_data['password'])
 
     # Submit the login form
     password_field.send_keys(Keys.RETURN)
@@ -70,15 +72,18 @@ def login(driver):
 
     time.sleep(2)
 
-    # pyautogui.press('f11')
+    pyautogui.press('f11')
+
+    time.sleep(2)
 
     full_screen_selection = driver.find_element(By.ID, 'button-1239-btnIconEl')
     full_screen_selection.click()
 
 def main():
     driver = setup_browser()
+    vms_data = json.loads(sys.argv[1])
     try:
-        login(driver)
+        login(driver, vms_data)
         print("Child script completed. Browser will remain open.")
         while os.path.exists(COMMON_FILE):
             time.sleep(5)  # Keep the browser running indefinitely
