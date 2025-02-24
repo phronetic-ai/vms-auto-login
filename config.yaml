@@ -1,6 +1,7 @@
 webroom_id: "67a078c396cb9f44a4156666"
 sleep_time: 900
 vms_data:
+  browser: "chrome"
   url: "http://192.168.86.10/"
   username: "admin"
   password: "@2022meru"

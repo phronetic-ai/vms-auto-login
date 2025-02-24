@@ -9,22 +9,27 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.edge.options import Options
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
-
 COMMON_FILE = "a.txt"
 
-def setup_browser():
+def setup_browser(browser):
     """Sets up the Selenium WebDriver using WebDriver Manager."""
-    browser_options = Options()
-    browser_options.add_argument("--start-maximized")  # Ensure the browser opens in full-screen mode
-    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=browser_options)
-    driver = webdriver.Edge(service=Service(EdgeChromiumDriverManager().install()), options=browser_options)
+    driver = None
+    if browser == 'chrome':
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.chrome.options import Options
+        from webdriver_manager.chrome import ChromeDriverManager
+        browser_options = Options()
+        browser_options.add_argument("--start-maximized") # Ensure the browser opens in full-screen mode
+        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=browser_options)
+    elif browser == 'edge':
+        from selenium.webdriver.edge.service import Service
+        from selenium.webdriver.edge.options import Options
+        from webdriver_manager.microsoft import EdgeChromiumDriverManager
+        browser_options = Options()
+        browser_options.add_argument("--start-maximized") # Ensure the browser opens in full-screen mode
+        driver = webdriver.Edge(service=Service(EdgeChromiumDriverManager().install()), options=browser_options)
+    else:
+        print(f"[ERROR] Invalid browser - {browser}")
     return driver
 
 def login(driver, vms_data):
@@ -80,18 +85,19 @@ def login(driver, vms_data):
     full_screen_selection.click()
 
 def main():
-    driver = setup_browser()
     vms_data = json.loads(sys.argv[1])
-    try:
-        login(driver, vms_data)
-        print("Child script completed. Browser will remain open.")
-        while os.path.exists(COMMON_FILE):
-            time.sleep(5)  # Keep the browser running indefinitely
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        time.sleep(5)
-        driver.quit()
+    driver = setup_browser(browser=vms_data['browser'])
+    if driver:
+        try:
+            login(driver, vms_data)
+            print("Child script completed. Browser will remain open.")
+            while os.path.exists(COMMON_FILE):
+                time.sleep(5) # Keep the browser running indefinitely
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            time.sleep(5)
+            driver.quit()
 
 if __name__ == "__main__":
     main()
